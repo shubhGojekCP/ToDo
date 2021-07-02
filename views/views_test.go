@@ -221,3 +221,89 @@ func TestDeleteTaskByInvalidId(t *testing.T) {
 	}
 
 }
+
+func TestUpdateTaskExisting(t *testing.T) {
+
+	Data = Data[:0]
+	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
+	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(CreateTask)
+
+	handler.ServeHTTP(rr, req)
+	mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":false}`)
+	req, err = http.NewRequest("PUT", `/api/task/update`, bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr = httptest.NewRecorder()
+	handler = http.HandlerFunc(UpdateTaskStatus)
+
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+}
+func TestUpdateTaskNonExisting(t *testing.T) {
+
+	Data = Data[:0]
+	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
+	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(CreateTask)
+
+	handler.ServeHTTP(rr, req)
+	mockedTask = []byte(`{"Id":1,"Task":"Swimming","Status":false}`)
+	req, err = http.NewRequest("PUT", `/api/task/update`, bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr = httptest.NewRecorder()
+	handler = http.HandlerFunc(UpdateTaskStatus)
+
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusNotFound {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+}
+
+func TestUpdateTaskInvalidData(t *testing.T) {
+
+	Data = Data[:0]
+	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
+	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(CreateTask)
+
+	handler.ServeHTTP(rr, req)
+	mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":"false"}`)
+	req, err = http.NewRequest("PUT", `/api/task/update`, bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr = httptest.NewRecorder()
+	handler = http.HandlerFunc(UpdateTaskStatus)
+
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+}
