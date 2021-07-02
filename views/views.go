@@ -88,3 +88,10 @@ func UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 
 }
+
+func GetAllTask(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(Data)
+
+}
