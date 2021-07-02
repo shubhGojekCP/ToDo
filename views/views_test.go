@@ -131,3 +131,93 @@ func TestGetTaskByInvalidId(t *testing.T) {
 	}
 
 }
+
+func TestDeleteExistingTask(t *testing.T) {
+
+	Data = Data[:0]
+	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
+	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(CreateTask)
+
+	handler.ServeHTTP(rr, req)
+
+	req, err = http.NewRequest("DELETE", `/api/task/delete/2`, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr = httptest.NewRecorder()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/api/task/delete/{id}", DeleteTask)
+
+	router.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+}
+
+func TestDeleteNonExistingTask(t *testing.T) {
+
+	Data = Data[:0]
+	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
+	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(CreateTask)
+
+	handler.ServeHTTP(rr, req)
+
+	req, err = http.NewRequest("DELETE", `/api/task/delete/1`, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr = httptest.NewRecorder()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/api/task/delete/{id}", DeleteTask)
+
+	router.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusNotFound {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+}
+
+func TestDeleteTaskByInvalidId(t *testing.T) {
+
+	Data = Data[:0]
+	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
+	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(CreateTask)
+
+	handler.ServeHTTP(rr, req)
+
+	req, err = http.NewRequest("DELETE", `/api/task/delete/qwe`, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr = httptest.NewRecorder()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/api/task/delete/{id}", DeleteTask)
+
+	router.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+}
