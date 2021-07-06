@@ -4,306 +4,158 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateTask(t *testing.T) {
 
-	var mockedTask = []byte(`{"Id":1,"Task":"Running","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
+	var mockedData = []struct {
+		data     string
+		status   int
+		response string
+	}{
+		{`{"Id":1,"Task":"Running","Status":true}`, http.StatusCreated, `{"Message":"Created Successfully","Body":{"Id":1,"Task":"Running","Status":true},"Status":201}` + "\n"},     // Creating Task For the First Time
+		{`{"Id":1,"Task":"Running","Status":true}`, http.StatusOK, `{"Message":"Task with ID 1 Already Exists","Body":{"Id":1,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Creating Task With Same ID
+		{`{"Id":1,"Task":"Running","Status":"true"}`, http.StatusBadRequest, `{"Message":"Bad Request,Invalid Data","Body":null,"Status":400}` + "\n"},                               // Creating Task With Invalid Data
 	}
 
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
+	for _, e := range mockedData {
+		var mockedTask = []byte(e.data)
+		req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	handler.ServeHTTP(rr, req)
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(CreateTask)
 
-	if status := rr.Code; status != http.StatusCreated {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusCreated)
-	}
-	expected := `{"Status":"Creates Successfully","StatusCode":201,"Proto":"","ProtoMajor":0,"ProtoMinor":0,"Header":null,"Body":null,"ContentLength":0,"TransferEncoding":null,"Close":false,"Uncompressed":false,"Trailer":null,"Request":null,"TLS":null}` + "\n"
-	if rr.Body.String() != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			rr.Body, expected)
-	}
+		handler.ServeHTTP(rr, req)
+		status := rr.Code
+		assert.Equal(t, e.status, status)
+		assert.Equal(t, e.response, rr.Body.String())
 
-}
-
-func TestGetTaskByIdExisting(t *testing.T) {
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
-
-	handler.ServeHTTP(rr, req)
-
-	req, err = http.NewRequest("GET", `/api/task/2`, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
-
-	router := mux.NewRouter()
-	router.HandleFunc("/api/task/{id}", GetTaskById)
-
-	router.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-
-	expected := `{"Id":2,"Task":"Swimming","Status":true}` + "\n"
-
-	if strings.Compare(rr.Body.String(), expected) != 0 {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			rr.Body, expected)
 	}
 
 }
 
-func TestGetTaskByIdNonExisting(t *testing.T) {
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
+func TestGetTaskById(t *testing.T) {
+	var mockedData = []struct {
+		data     string
+		url      string
+		status   int
+		response string
+	}{
+		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/2`, http.StatusOK, `{"Message":"OK","Body":{"Id":2,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Creating Task For the First Time
+		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/pi`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                            // Creating Task For the First Time
+		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusNotFound, `{"Message":"Task with ID 3 Not Found","Body":null,"Status":404}` + "\n"},        // Creating Task For the First Time
 
-	handler.ServeHTTP(rr, req)
-
-	req, err = http.NewRequest("GET", `/api/task/1`, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
-
-	router := mux.NewRouter()
-	router.HandleFunc("/api/task/{id}", GetTaskById)
-
-	router.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusNotFound {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
 	}
 
-}
+	for _, e := range mockedData {
+		var mockedTask = []byte(e.data)
+		req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+		if err != nil {
+			t.Fatal(err)
+		}
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(CreateTask)
 
-func TestGetTaskByInvalidId(t *testing.T) {
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
+		handler.ServeHTTP(rr, req)
 
-	handler.ServeHTTP(rr, req)
+		req, err = http.NewRequest("GET", e.url, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rr = httptest.NewRecorder()
 
-	req, err = http.NewRequest("GET", `/api/task/qwe`, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
+		router := mux.NewRouter()
+		router.HandleFunc("/api/task/{id}", GetTaskById)
 
-	router := mux.NewRouter()
-	router.HandleFunc("/api/task/{id}", GetTaskById)
+		router.ServeHTTP(rr, req)
+		status := rr.Code
+		assert.Equal(t, e.status, status)
+		assert.Equal(t, e.response, rr.Body.String())
 
-	router.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
 	}
 
 }
 
-func TestDeleteExistingTask(t *testing.T) {
+func TestDeleteTask(t *testing.T) {
+	var mockedData = []struct {
+		data     string
+		url      string
+		status   int
+		response string
+	}{
+		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusOK, `{"Message":"Deleted","Body":{"Id":3,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Creating Task For the First Time
+		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/pi`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                                 // Creating Task For the First Time
+		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/4`, http.StatusNotFound, `{"Message":"Task with ID 4 Not Found","Body":null,"Status":404}` + "\n"},             // Creating Task For the First Time
 
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
-
-	handler.ServeHTTP(rr, req)
-
-	req, err = http.NewRequest("DELETE", `/api/task/delete/2`, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
-
-	router := mux.NewRouter()
-	router.HandleFunc("/api/task/delete/{id}", DeleteTask)
-
-	router.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
 	}
 
-}
+	for _, e := range mockedData {
+		var mockedTask = []byte(e.data)
+		req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+		if err != nil {
+			t.Fatal(err)
+		}
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(CreateTask)
 
-func TestDeleteNonExistingTask(t *testing.T) {
+		handler.ServeHTTP(rr, req)
 
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
+		req, err = http.NewRequest("DELETE", e.url, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rr = httptest.NewRecorder()
 
-	handler.ServeHTTP(rr, req)
+		router := mux.NewRouter()
+		router.HandleFunc("/api/task/{id}", DeleteTask)
 
-	req, err = http.NewRequest("DELETE", `/api/task/delete/1`, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
-
-	router := mux.NewRouter()
-	router.HandleFunc("/api/task/delete/{id}", DeleteTask)
-
-	router.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusNotFound {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
+		router.ServeHTTP(rr, req)
+		assert.Equal(t, e.status, rr.Code)
+		assert.Equal(t, e.response, rr.Body.String())
 	}
 
 }
 
-func TestDeleteTaskByInvalidId(t *testing.T) {
+func TestUpdateTask(t *testing.T) {
+	var mockedData = []struct {
+		data        string
+		updatedData string
+		status      int
+		response    string
+	}{
+		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":4,"Task":"Swimming","Status":false}`, http.StatusOK, `{"Message":"Deleted","Body":{"Id":3,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Creating Task For the First Time
+		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":4,"Task":"Swimming","Status":"false"}`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                                // Creating Task For the First Time
+		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":5,"Task":"Swimming","Status":false}`, http.StatusNotFound, `{"Message":"Task with ID 4 Not Found","Body":null,"Status":404}` + "\n"},             // Creating Task For the First Time
 
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
 	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
+	for _, e := range mockedData {
+		var mockedTask = []byte(e.data)
+		req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
+		if err != nil {
+			t.Fatal(err)
+		}
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(CreateTask)
 
-	handler.ServeHTTP(rr, req)
+		handler.ServeHTTP(rr, req)
+		mockedTask = []byte(e.updatedData)
+		req, err = http.NewRequest("PUT", `/api/task/update`, bytes.NewBuffer(mockedTask))
+		if err != nil {
+			t.Fatal(err)
+		}
+		rr = httptest.NewRecorder()
+		handler = http.HandlerFunc(UpdateTaskStatus)
 
-	req, err = http.NewRequest("DELETE", `/api/task/delete/qwe`, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
+		handler.ServeHTTP(rr, req)
+		assert.Equal(t, e.status, rr.Code)
 
-	router := mux.NewRouter()
-	router.HandleFunc("/api/task/delete/{id}", DeleteTask)
-
-	router.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-
-}
-
-func TestUpdateTaskExisting(t *testing.T) {
-
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
-
-	handler.ServeHTTP(rr, req)
-	mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":false}`)
-	req, err = http.NewRequest("PUT", `/api/task/update`, bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
-	handler = http.HandlerFunc(UpdateTaskStatus)
-
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-
-}
-func TestUpdateTaskNonExisting(t *testing.T) {
-
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
-
-	handler.ServeHTTP(rr, req)
-	mockedTask = []byte(`{"Id":1,"Task":"Swimming","Status":false}`)
-	req, err = http.NewRequest("PUT", `/api/task/update`, bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
-	handler = http.HandlerFunc(UpdateTaskStatus)
-
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusNotFound {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-
-}
-
-func TestUpdateTaskInvalidData(t *testing.T) {
-
-	Data = Data[:0]
-	var mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":true}`)
-	req, err := http.NewRequest("POST", "/api/task", bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
-
-	handler.ServeHTTP(rr, req)
-	mockedTask = []byte(`{"Id":2,"Task":"Swimming","Status":"false"}`)
-	req, err = http.NewRequest("PUT", `/api/task/update`, bytes.NewBuffer(mockedTask))
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
-	handler = http.HandlerFunc(UpdateTaskStatus)
-
-	handler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
 	}
 
 }
@@ -320,9 +172,6 @@ func TestGetAllTask(t *testing.T) {
 
 	handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
+	assert.Equal(t, http.StatusOK, rr.Code)
 
 }
