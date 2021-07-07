@@ -1,0 +1,266 @@
+swagger: '2.0'
+consumes:
+  - application/json
+produces:
+  - application/json
+schemes:
+  - http
+  - https
+info:
+  description: "this is a REST API for managing TODOs"
+  title: 'ToDo API'
+  termsOfService: 'there are no TOS at this moment, use at your own risk we take no responsibility'
+  contact:
+    name: 'Shubham Bhawsar'
+    url: 'https://github.com/'
+    email: "bhawsarshubham741@gmail.com"
+  license:
+    name: ""
+  version: "1.0"
+host: localhost
+basePath: /api
+x-meta-value: value
+x-meta-array:
+  - value1
+  - value2
+x-meta-array-obj:
+  - name: obj
+    value: field
+paths:
+  /task:
+    get:
+      operationId: "getTodos"
+      deprecated: false
+      summary: "Lists all Todos."
+      description: "This will show all available Todos by default"
+      tags: []
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      schemes:
+      - http
+      - https
+      responses:
+        "200":
+          description: "successfully obtained data"
+          schema:
+            $ref: "#/definitions/todosList"
+    post:
+      operationId: "createTask"
+      deprecated: false
+      summary: "Creates a Task "
+      description: "Creates a Task given the name ,Id and Status of Task."
+      tags: []
+      consumes:
+      - application/json
+      schemes:
+      - http
+      - https
+      parameters:
+      - name: "title"
+        in: "body"
+        description: "You Need To send ID,Task And Status to Create task"
+        required: true
+        schema:
+          $ref: "#/definitions/taskRequestBody"
+      responses:
+        "201":
+          description: "successful creation"
+          schema:
+            $ref: "#/definitions/Response201"
+        "400":
+          description: "Invalid request body"
+          schema:
+            $ref: "#/definitions/Response400"
+        "200":
+          description: "Task With Same ID Already Exists"
+          schema:
+            $ref: "#/definitions/Response200"
+    put:
+      operationId: "updateTask"
+      deprecated: false
+      summary: "Updates a Task "
+      description: "Updates a Task given the name ,Id and Status of Task."
+      tags: []
+      consumes:
+      - application/json
+      schemes:
+      - http
+      - https
+      parameters:
+      - name: "title"
+        in: "body"
+        description: "You Need To send ID,Task And Status to Update task"
+        required: true
+        schema:
+          $ref: "#/definitions/taskRequestBody"
+      responses:
+        "404":
+          description: "Task With Given ID does not exists"
+          schema:
+            $ref: "#/definitions/Response404"
+        "200":
+          description: "Successfully Updated"
+          schema:
+            $ref: "#/definitions/Response200"
+  /task/{Id}:
+    get:
+      operationId: "getTaskById"
+      deprecated: false
+      summary: "Get a Task By its ID"
+      description: "Get a Task with a particular ID associated with it"
+      tags: []
+      consumes:
+      - application/json
+      schemes:
+      - http
+      - https
+      parameters:
+      - name: "Id"
+        in: "path"
+        description: "id of the task to fetch"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "Successfully Fetched "
+          schema:
+            $ref: "#/definitions/Response200"
+        "400":
+          description: "Invalid requested ID"
+          schema:
+            $ref: "#/definitions/Response400"
+        "404":
+          description: "Task with ID not Found"
+          schema:
+            $ref: "#/definitions/Response404"
+    delete:
+      operationId: "getDeletekById"
+      deprecated: false
+      summary: "Delete a Task By its ID"
+      description: "Delete a Task with a particular ID associated with it"
+      tags: []
+      consumes:
+      - application/json
+      schemes:
+      - http
+      - https
+      parameters:
+      - name: "Id"
+        in: "path"
+        description: "id of the task to fetch"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "Successfully Deleted "
+          schema:
+            $ref: "#/definitions/Response200"
+        "400":
+          description: "Invalid requested ID"
+          schema:
+            $ref: "#/definitions/Response400"
+        "404":
+          description: "Task with ID not Found"
+          schema:
+            $ref: "#/definitions/Response404"
+ 
+definitions:
+  Task:
+    type: "object"
+    properties:
+      Id:
+        type: "integer"
+        format: "int64"
+      Task:
+        type: "string"
+        format: "string"
+      Status:
+        type: "boolean"
+        format: "boolean"
+    xml: {}
+  Response200:
+    type: "object"
+    properties:
+      Message:  
+        type: "string"
+        format: "string"
+      Body:
+        $ref: "#/definitions/Task"
+      Status:
+        type: "integer"
+        format: "int64"
+        default: "200"
+    xml: {}
+  Response201:
+    type: "object"
+    properties:
+      Message:  
+        type: "string"
+        format: "string"
+      Body:
+        $ref: "#/definitions/Task"
+      Status:
+        type: "integer"
+        format: "int64"
+        default: 201
+    xml: {}
+  Response400:
+    type: "object"
+    properties:
+      Message:  
+        type: "string"
+        format: "string"
+      Status:
+        type: "integer"
+        format: "int64"
+        default: 400
+    xml: {}
+  Response404:
+    type: "object"
+    properties:
+      Message:  
+        type: "string"
+        format: "string"
+      Status:
+        type: "integer"
+        format: "int64"
+        default: 404
+    xml: {}
+
+ 
+  todosList:
+    type: "object"
+    properties:
+      Message: 
+        type: "string"
+        format: "string"
+      Body:
+        type: "array"
+        items:
+          $ref: "#/definitions/Task"
+      Status:
+        type: "integer"
+        format: "int64"
+        default: 200
+    xml:
+      name: "todosList"
+  taskRequestBody:
+    type: "object"
+    properties:
+      Id:
+        type: "integer"
+        format: "int64"
+      Task:
+        type: "string"
+        format: "string"
+      Status:
+        type: "boolean"
+        format: "boolean"
+    xml:
+      name: "taskRequestBody"
+      
+  

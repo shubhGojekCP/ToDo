@@ -48,9 +48,9 @@ func TestGetTaskById(t *testing.T) {
 		status   int
 		response string
 	}{
-		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/2`, http.StatusOK, `{"Message":"OK","Body":{"Id":2,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Creating Task For the First Time
-		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/pi`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                            // Creating Task For the First Time
-		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusNotFound, `{"Message":"Task with ID 3 Not Found","Body":null,"Status":404}` + "\n"},        // Creating Task For the First Time
+		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/2`, http.StatusOK, `{"Message":"OK","Body":{"Id":2,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Geting Task For the Valid and Existing ID
+		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/pi`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                            // Getting Task For the Invalid ID
+		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusNotFound, `{"Message":"Task with ID 3 Not Found","Body":null,"Status":404}` + "\n"},        // Getting Task For The Non Existent ID
 
 	}
 
@@ -90,9 +90,9 @@ func TestDeleteTask(t *testing.T) {
 		status   int
 		response string
 	}{
-		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusOK, `{"Message":"Deleted","Body":{"Id":3,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Creating Task For the First Time
-		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/pi`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                                 // Creating Task For the First Time
-		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/4`, http.StatusNotFound, `{"Message":"Task with ID 4 Not Found","Body":null,"Status":404}` + "\n"},             // Creating Task For the First Time
+		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusOK, `{"Message":"Deleted","Body":{"Id":3,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Deleting Task for Valid and Existing ID
+		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/pi`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                                 // Deleting Task For the Invalid ID
+		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/4`, http.StatusNotFound, `{"Message":"Task with ID 4 Not Found","Body":null,"Status":404}` + "\n"},             // Deleting Task For The Non Existent ID
 
 	}
 
@@ -130,9 +130,9 @@ func TestUpdateTask(t *testing.T) {
 		status      int
 		response    string
 	}{
-		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":4,"Task":"Swimming","Status":false}`, http.StatusOK, `{"Message":"Deleted","Body":{"Id":3,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Creating Task For the First Time
-		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":4,"Task":"Swimming","Status":"false"}`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                                // Creating Task For the First Time
-		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":5,"Task":"Swimming","Status":false}`, http.StatusNotFound, `{"Message":"Task with ID 4 Not Found","Body":null,"Status":404}` + "\n"},             // Creating Task For the First Time
+		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":4,"Task":"Swimming","Status":false}`, http.StatusOK, `{"Message":"Deleted","Body":{"Id":3,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Updating Task for Valid and Existing ID and Data
+		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":4,"Task":"Swimming","Status":"false"}`, http.StatusBadRequest, `{"message":"Invalid ID","errorcode":400}` + "\n"},                                // Updating Task For the Invalid Data
+		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":5,"Task":"Swimming","Status":false}`, http.StatusNotFound, `{"Message":"Task with ID 4 Not Found","Body":null,"Status":404}` + "\n"},             // Updating Task For The Non Existent ID
 
 	}
 	for _, e := range mockedData {
