@@ -29,8 +29,8 @@ func (r Error) KnowStatus() int {
 }
 
 type Error struct {
-	Message string `json:"message"`
-	Status  int    `json:"errorcode"`
+	Message string `json:"Message"`
+	Status  int    `json:"ErrorCode"`
 }
 
 type Response struct {

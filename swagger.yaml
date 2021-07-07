@@ -214,7 +214,7 @@ definitions:
       Message:  
         type: "string"
         format: "string"
-      Status:
+      ErrorCode:
         type: "integer"
         format: "int64"
         default: 400
@@ -225,7 +225,7 @@ definitions:
       Message:  
         type: "string"
         format: "string"
-      Status:
+      ErrorCode:
         type: "integer"
         format: "int64"
         default: 404
