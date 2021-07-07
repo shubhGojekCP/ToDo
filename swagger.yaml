@@ -94,7 +94,7 @@ paths:
         description: "You Need To send ID,Task And Status to Update task"
         required: true
         schema:
-          $ref: "#/definitions/taskRequestBody"
+          $ref: "#/definitions/taskRequestUpdateBody"
       responses:
         "404":
           description: "Task With Given ID does not exists"
@@ -103,7 +103,11 @@ paths:
         "200":
           description: "Successfully Updated"
           schema:
-            $ref: "#/definitions/Response200"
+            $ref: "#/definitions/ResponseUpdate200"
+        "400":
+          description: "Invalid Data,Bad Request"
+          schema:
+            $ref: "#/definitions/Response400"
   /task/{Id}:
     get:
       operationId: "getTaskById"
@@ -127,7 +131,7 @@ paths:
         "200":
           description: "Successfully Fetched "
           schema:
-            $ref: "#/definitions/Response200"
+            $ref: "#/definitions/ResponseById200"
         "400":
           description: "Invalid requested ID"
           schema:
@@ -158,7 +162,7 @@ paths:
         "200":
           description: "Successfully Deleted "
           schema:
-            $ref: "#/definitions/Response200"
+            $ref: "#/definitions/Delete200"
         "400":
           description: "Invalid requested ID"
           schema:
@@ -181,6 +185,10 @@ definitions:
       Status:
         type: "boolean"
         format: "boolean"
+    example: 
+      Id: 1
+      Task: "Running"
+      Status: false
     xml: {}
   Response200:
     type: "object"
@@ -188,8 +196,52 @@ definitions:
       Message:  
         type: "string"
         format: "string"
+        default: "Task with ID 1 Already Exists"
       Body:
         $ref: "#/definitions/Task"
+      Status:
+        type: "integer"
+        format: "int64"
+        default: "200"
+    xml: {}
+  Delete200:
+    type: "object"
+    properties:
+      Message:  
+        type: "string"
+        format: "string"
+        default: "Deleted"
+      Body:
+        $ref: "#/definitions/Task"
+      Status:
+        type: "integer"
+        format: "int64"
+        default: "200"
+    xml: {}
+  ResponseById200:
+    type: "object"
+    properties:
+      Message:  
+        type: "string"
+        format: "string"
+        default: "OK"
+      Body:
+        $ref: "#/definitions/Task"
+      Status:
+        type: "integer"
+        format: "int64"
+        default: "200"
+    xml: {}
+  
+  ResponseUpdate200:
+    type: "object"
+    properties:
+      Message:  
+        type: "string"
+        format: "string"
+        default: "Updated Successfully"
+      Body:
+        $ref: "#/definitions/taskRequestUpdateBody"
       Status:
         type: "integer"
         format: "int64"
@@ -201,6 +253,7 @@ definitions:
       Message:  
         type: "string"
         format: "string"
+        default: "Created Successfully"
       Body:
         $ref: "#/definitions/Task"
       Status:
@@ -218,6 +271,9 @@ definitions:
         type: "integer"
         format: "int64"
         default: 400
+    example:
+      Message: "Invalid Data, Bad Request"
+      ErrorCode: 400
     xml: {}
   Response404:
     type: "object"
@@ -229,6 +285,9 @@ definitions:
         type: "integer"
         format: "int64"
         default: 404
+    example:
+      Message: "Data With ID 2 not Found"
+      ErrorCode: 404
     xml: {}
 
  
@@ -260,6 +319,28 @@ definitions:
       Status:
         type: "boolean"
         format: "boolean"
+    example:
+      Id: 1
+      Task: "Running"
+      Status: false
+    xml:
+      name: "taskRequestBody"
+  taskRequestUpdateBody:
+    type: "object"
+    properties:
+      Id:
+        type: "integer"
+        format: "int64"
+      Task:
+        type: "string"
+        format: "string"
+      Status:
+        type: "boolean"
+        format: "boolean"
+    example:
+      Id: 1
+      Task: "Running"
+      Status: true
     xml:
       name: "taskRequestBody"
       

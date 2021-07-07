@@ -1,4 +1,4 @@
-package views
+package controller
 
 import (
 	"bytes"
@@ -17,9 +17,9 @@ func TestCreateTask(t *testing.T) {
 		status   int
 		response string
 	}{
-		{`{"Id":1,"Task":"Running","Status":true}`, http.StatusCreated, `{"Message":"Created Successfully","Body":{"Id":1,"Task":"Running","Status":true},"Status":201}` + "\n"},     // Creating Task For the First Time
-		{`{"Id":1,"Task":"Running","Status":true}`, http.StatusOK, `{"Message":"Task with ID 1 Already Exists","Body":{"Id":1,"Task":"Running","Status":true},"Status":200}` + "\n"}, // Creating Task With Same ID
-		{`{"Id":1,"Task":"Running","Status":"true"}`, http.StatusBadRequest, `{"Message":"Bad Request,Invalid Data","ErrorCode":400}` + "\n"},                                        // Creating Task With Invalid Data
+		{`{"Id":1,"Task":"Running","Status":true}`, http.StatusCreated, `{"Message":"OK","Body":{"Id":1,"Task":"Running","Status":true},"Status":201}` + "\n"}, // Creating Task For the First Time
+		{`{"Id":1,"Task":"Running","Status":true}`, http.StatusOK, `{"Message":"OK","Body":{"Id":1,"Task":"Running","Status":true},"Status":200}` + "\n"},      // Creating Task With Same ID
+		{`{"Id":1,"Task":"Running","Status":"true"}`, http.StatusBadRequest, `{"Message":"Bad Request,Invalid Data","ErrorCode":400}` + "\n"},                  // Creating Task With Invalid Data
 	}
 
 	for _, e := range mockedData {

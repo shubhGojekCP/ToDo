@@ -1,4 +1,4 @@
-package views
+package controller
 
 import (
 	"ToDo/services"
@@ -10,10 +10,7 @@ import (
 // invalid Data,or 200 if Task with ID already exists.
 func CreateTask(w http.ResponseWriter, r *http.Request) {
 	services.InfoLogger.Println(">> CreateTask")
-	w.Header().Set("Content-Type", "application/json")
-	response := services.SvcAddTask(r)
-	w.WriteHeader(response.KnowStatus())
-	json.NewEncoder(w).Encode(response)
+	commonReturn(w, r, services.SvcAddTask)
 
 }
 
@@ -21,10 +18,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 // or 404 if Task with ID does not exists.
 func GetTaskById(w http.ResponseWriter, r *http.Request) {
 	services.InfoLogger.Println(">> GetTaskById")
-	w.Header().Set("Content-Type", "application/json")
-	response := services.SvcGetDataById(r)
-	w.WriteHeader(response.KnowStatus())
-	json.NewEncoder(w).Encode(response)
+	commonReturn(w, r, services.SvcGetDataById)
 
 }
 
@@ -32,10 +26,7 @@ func GetTaskById(w http.ResponseWriter, r *http.Request) {
 // invalid ID,or 404 if Task with ID does not exists.
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	services.InfoLogger.Println(">> DeleteTask")
-	w.Header().Set("Context-Type", "application/json")
-	response := services.SvcRemoveTask(r)
-	w.WriteHeader(response.KnowStatus())
-	json.NewEncoder(w).Encode(response)
+	commonReturn(w, r, services.SvcRemoveTask)
 
 }
 
@@ -43,18 +34,21 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 // invalid data,or 404 if Task with ID does not exists.
 func UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 	services.InfoLogger.Println(">> UpdatetaskStatus")
-	w.Header().Set("Context-Type", "application/json")
-	response := services.SvcUpdateTask(r)
-	w.WriteHeader(response.KnowStatus())
-	json.NewEncoder(w).Encode(response)
+	commonReturn(w, r, services.SvcUpdateTask)
 
 }
 
 //GetAllTask gets all the tasks.
 func GetAllTask(w http.ResponseWriter, r *http.Request) {
 	services.InfoLogger.Println(">> GetAllTask")
+	commonReturn(w, r, services.SvcGetAllData)
+
+}
+
+func commonReturn(w http.ResponseWriter, r *http.Request, f func(*http.Request) services.Responses) {
+
 	w.Header().Set("Content-Type", "application/json")
-	response := services.SvcGetAllData()
+	response := f(r)
 	w.WriteHeader(response.KnowStatus())
 	json.NewEncoder(w).Encode(response)
 

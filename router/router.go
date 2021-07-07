@@ -1,7 +1,7 @@
 package router
 
 import (
-	"ToDo/views"
+	"ToDo/controller"
 
 	"github.com/gorilla/mux"
 )
@@ -9,11 +9,11 @@ import (
 func Router() *mux.Router {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/api/task", views.CreateTask).Methods("POST")
-	router.HandleFunc("/api/task/{id}", views.GetTaskById).Methods("GET")
-	router.HandleFunc("/api/task/{id}", views.DeleteTask).Methods("DELETE")
-	router.HandleFunc("/api/task", views.UpdateTaskStatus).Methods("PUT")
-	router.HandleFunc("/api/task", views.GetAllTask).Methods("GET")
+	router.HandleFunc("/api/task", controller.CreateTask).Methods("POST")
+	router.HandleFunc("/api/task/{id}", controller.GetTaskById).Methods("GET")
+	router.HandleFunc("/api/task/{id}", controller.DeleteTask).Methods("DELETE")
+	router.HandleFunc("/api/task", controller.UpdateTaskStatus).Methods("PUT")
+	router.HandleFunc("/api/task", controller.GetAllTask).Methods("GET")
 
 	return router
 }

@@ -1,7 +1,7 @@
 package services
 
 import (
-	"ToDo/models"
+	"ToDo/storage"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,112 +12,89 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var Data = make(map[int]models.ToDoList)
-
-func checkExistence(Id int) bool {
-	InfoLogger.Println(">> checkExistence")
-	_, keyExists := Data[Id]
-	return keyExists
-}
-
-func checkDataValidation(body io.ReadCloser) models.Response {
+func checkDataValidation(body io.ReadCloser) Response {
 	InfoLogger.Println(">> checkDataValidation")
-	var data models.ToDoList
+	var data storage.ToDoList
 	bodyBytes, err := ioutil.ReadAll(body)
 
 	if err != nil {
 		ErrorLogger.Println(">> Invalid Data")
-		return models.Response{Message: "Invalid Data", Status: 400}
+		return Response{Message: "Invalid Data", Status: 400}
 	}
 	if err := json.Unmarshal(bodyBytes, &data); err != nil {
 		ErrorLogger.Println(">> Invalid Data")
-		return models.Response{Message: "Invalid Data", Status: 400}
+		return Response{Message: "Invalid Data", Status: 400}
 	}
-	return models.Response{Message: "OK", Body: data, Status: 200}
+	return Response{Message: "OK", Body: data, Status: 200}
 
 }
 
-func SvcAddTask(r *http.Request) models.Responses {
+func SvcAddTask(r *http.Request) Responses {
 	InfoLogger.Println(">> AddTask")
-	var response models.Response
-	var newTask models.ToDoList
+	var newTask storage.ToDoList
+	var response Response
 	checkResponse := checkDataValidation(r.Body)
 	if !checkResponse.IsOk() {
-		return models.Error{Status: 400, Message: "Bad Request,Invalid Data"}
+		return Error{Status: 400, Message: "Bad Request,Invalid Data"}
 	}
-	newTask = checkResponse.Body.(models.ToDoList)
-	if !checkExistence(newTask.Id) {
-		Data[newTask.Id] = newTask
-		response.Status = 201
-		response.Message = "Created Successfully"
-		response.Body = Data[newTask.Id]
-		return response
-
-	}
-	response.Message = fmt.Sprintf("Task with ID %d Already Exists", newTask.Id)
-	response.Body = Data[newTask.Id]
-	response.Status = 200
+	newTask = checkResponse.Body.(storage.ToDoList)
+	res, status := storage.AddTask(newTask)
+	response.Status = status
+	response.Message = "OK"
+	response.Body = res
 	return response
-
 }
 
-func SvcGetAllData() models.Response {
+func SvcGetAllData(r *http.Request) Responses {
 	InfoLogger.Println(">> GetAllData")
-	var values []models.ToDoList
-	for _, val := range Data {
-		values = append(values, val)
-	}
-	return models.Response{Message: "OK", Body: values, Status: 200}
+	values := storage.AllTask()
+	return Response{Message: "OK", Body: values, Status: 200}
 }
 
-func SvcGetDataById(r *http.Request) models.Responses {
+func SvcGetDataById(r *http.Request) Responses {
 	InfoLogger.Println(">> GetDataById")
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		ErrorLogger.Println(">> Invalid ID")
-		return models.Error{Message: "Invalid ID", Status: 400}
+		return Error{Message: "Invalid ID", Status: 400}
 	}
-	if checkExistence(id) {
-		return models.Response{Message: "OK", Body: Data[id], Status: 200}
+	res, status := storage.GetById(id)
+	if status == 404 {
+		return Error{Message: fmt.Sprintf("Task with ID %d Not Found", id), Status: status}
 	}
-	return models.Error{Message: fmt.Sprintf("Task with ID %d Not Found", id), Status: 404}
+	return Response{Message: "OK", Body: res, Status: status}
 
 }
 
-func SvcRemoveTask(r *http.Request) models.Responses {
+func SvcRemoveTask(r *http.Request) Responses {
 	InfoLogger.Println(">> RemoveTask")
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		ErrorLogger.Println(">> Invalid ID")
-		return models.Error{Message: "Invalid ID", Status: 400}
+		return Error{Message: "Invalid ID", Status: 400}
 	}
-	if checkExistence(id) {
-		instance := Data[id]
-		delete(Data, id)
-		return models.Response{Message: "Deleted", Body: instance, Status: 200}
+	res, status := storage.RemoveById(id)
+	if status == 404 {
+		return Error{Message: fmt.Sprintf("Task with ID %d Not Found", id), Status: status}
 	}
-	return models.Error{Message: fmt.Sprintf("Task with ID %d Not Found", id), Status: 404}
+	return Response{Message: "Deleted", Body: res, Status: status}
 
 }
 
-func SvcUpdateTask(r *http.Request) models.Responses {
+func SvcUpdateTask(r *http.Request) Responses {
 	InfoLogger.Println(">> SvcUpdateTask")
 	checkResponse := checkDataValidation(r.Body)
-	var response models.Response
-	var newTask models.ToDoList
+	var newTask storage.ToDoList
 	if !checkResponse.IsOk() {
 		return checkResponse
 	}
-	newTask = checkResponse.Body.(models.ToDoList)
-	if !checkExistence(newTask.Id) {
-		return models.Error{Status: 404, Message: "Data Does not Exists"}
+	newTask = checkResponse.Body.(storage.ToDoList)
+	res, status := storage.UpdateTask(newTask)
+	if status == 404 {
+		return Error{Message: "Data Does not Exists", Status: status}
 	}
-	Data[newTask.Id] = newTask
-	response.Status = 200
-	response.Body = Data[newTask.Id]
-	response.Message = "Updated Successfully"
-	return response
+	return Response{Message: "Updated Successfully", Body: res, Status: status}
 
 }
