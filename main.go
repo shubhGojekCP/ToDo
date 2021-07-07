@@ -9,6 +9,9 @@ import (
 
 func main() {
 	r := router.Router()
-	fmt.Println("Starting server on the port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	var port string
+	fmt.Println("Enter the PORT: ")
+	fmt.Scanln(&port)
+	fmt.Printf("Starting server on the port %s...", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
 }
