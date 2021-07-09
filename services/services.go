@@ -1,100 +1,70 @@
 package services
 
 import (
-	"ToDo/storage"
-	"encoding/json"
-	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
+	"ToDo/controller"
+	"ToDo/model"
+	"ToDo/utils"
 )
 
-func checkDataValidation(body io.ReadCloser) Response {
-	InfoLogger.Println(">> checkDataValidation")
-	var data storage.ToDoList
-	bodyBytes, err := ioutil.ReadAll(body)
+type Service struct {
+	DataStore Store
+}
 
+type Store interface {
+	AddTask(data model.ToDoList) model.ToDoList
+	GetById(id int) (model.ToDoList, error)
+	RemoveById(id int) (model.ToDoList, error)
+	UpdateTask(data model.ToDoList) (model.ToDoList, error)
+	AllTask() ([]model.ToDoList, error)
+}
+
+func (s Service) SvcAddTask(data controller.ToDo) controller.ToDo {
+	utils.InfoLogger.Println(">> AddTask")
+	res := s.DataStore.AddTask(model.ToDoList{Id: data.Id, Status: data.Status, Task: data.Task})
+	return controller.ToDo{Id: res.Id, Status: res.Status, Task: res.Task}
+}
+
+func (s Service) SvcGetAllData() ([]controller.ToDo, error) {
+	utils.InfoLogger.Println(">> GetAllData")
+	values, err := s.DataStore.AllTask()
 	if err != nil {
-		ErrorLogger.Println(">> Invalid Data")
-		return Response{Message: "Invalid Data", Status: 400}
+		return []controller.ToDo{}, nil
 	}
-	if err := json.Unmarshal(bodyBytes, &data); err != nil {
-		ErrorLogger.Println(">> Invalid Data")
-		return Response{Message: "Invalid Data", Status: 400}
+	var res []controller.ToDo
+	for _, data := range values {
+		res = append(res, controller.ToDo{Id: data.Id, Status: data.Status, Task: data.Task})
 	}
-	return Response{Message: "OK", Body: data, Status: 200}
-
+	return res, nil
 }
 
-func SvcAddTask(r *http.Request) Responses {
-	InfoLogger.Println(">> AddTask")
-	var newTask storage.ToDoList
-	var response Response
-	checkResponse := checkDataValidation(r.Body)
-	if !checkResponse.IsOk() {
-		return Error{Status: 400, Message: "Bad Request,Invalid Data"}
-	}
-	newTask = checkResponse.Body.(storage.ToDoList)
-	res, status := storage.AddTask(newTask)
-	response.Status = status
-	response.Message = "OK"
-	response.Body = res
-	return response
-}
+func (s Service) SvcGetDataById(id int) (controller.ToDo, error) {
+	utils.InfoLogger.Println(">> GetDataById")
 
-func SvcGetAllData(r *http.Request) Responses {
-	InfoLogger.Println(">> GetAllData")
-	values := storage.AllTask()
-	return Response{Message: "OK", Body: values, Status: 200}
-}
-
-func SvcGetDataById(r *http.Request) Responses {
-	InfoLogger.Println(">> GetDataById")
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
+	res, err := s.DataStore.GetById(id)
 	if err != nil {
-		ErrorLogger.Println(">> Invalid ID")
-		return Error{Message: "Invalid ID", Status: 400}
+		return controller.ToDo{}, err
 	}
-	res, status := storage.GetById(id)
-	if status == 404 {
-		return Error{Message: fmt.Sprintf("Task with ID %d Not Found", id), Status: status}
-	}
-	return Response{Message: "OK", Body: res, Status: status}
+
+	return controller.ToDo{Id: res.Id, Status: res.Status, Task: res.Task}, nil
 
 }
 
-func SvcRemoveTask(r *http.Request) Responses {
-	InfoLogger.Println(">> RemoveTask")
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
+func (s Service) SvcRemoveTask(id int) (controller.ToDo, error) {
+	utils.InfoLogger.Println(">> RemoveTask")
+	res, err := s.DataStore.RemoveById(id)
 	if err != nil {
-		ErrorLogger.Println(">> Invalid ID")
-		return Error{Message: "Invalid ID", Status: 400}
+		return controller.ToDo{}, err
 	}
-	res, status := storage.RemoveById(id)
-	if status == 404 {
-		return Error{Message: fmt.Sprintf("Task with ID %d Not Found", id), Status: status}
-	}
-	return Response{Message: "Deleted", Body: res, Status: status}
+	return controller.ToDo{Id: res.Id, Status: res.Status, Task: res.Task}, nil
 
 }
 
-func SvcUpdateTask(r *http.Request) Responses {
-	InfoLogger.Println(">> SvcUpdateTask")
-	checkResponse := checkDataValidation(r.Body)
-	var newTask storage.ToDoList
-	if !checkResponse.IsOk() {
-		return checkResponse
+func (s Service) SvcUpdateTask(data controller.ToDo) (controller.ToDo, error) {
+	utils.InfoLogger.Println(">> SvcUpdateTask")
+	res, err := s.DataStore.UpdateTask(model.ToDoList{Id: data.Id, Status: data.Status, Task: data.Task})
+	if err != nil {
+		return controller.ToDo{}, err
 	}
-	newTask = checkResponse.Body.(storage.ToDoList)
-	res, status := storage.UpdateTask(newTask)
-	if status == 404 {
-		return Error{Message: "Data Does not Exists", Status: status}
-	}
-	return Response{Message: "Updated Successfully", Body: res, Status: status}
+	return controller.ToDo{Id: res.Id, Status: res.Status, Task: res.Task}, nil
 
 }

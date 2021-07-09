@@ -2,11 +2,17 @@ package router
 
 import (
 	"ToDo/controller"
+	"ToDo/model"
+	"ToDo/services"
 
 	"github.com/gorilla/mux"
 )
 
 func Router() *mux.Router {
+	controller := controller.Handler{
+		Service: services.Service{DataStore: model.Storage{}},
+	}
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/task", controller.CreateTask).Methods("POST")
