@@ -20,7 +20,7 @@ type ToDo struct {
 
 type response struct {
 	Message string `json:"Message"`
-	Data    ToDo   `json:"Data"`
+	Data    ToDo   `json:"Body"`
 }
 
 type errorResponse struct {
@@ -120,6 +120,7 @@ func (h Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	err := checkParamValidation(params)
 	if err != nil {
 		w.WriteHeader(400)
+		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 400})
 		return
 	}
 	id, _ := strconv.Atoi(params["id"])

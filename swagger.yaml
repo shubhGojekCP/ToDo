@@ -196,7 +196,7 @@ definitions:
       Message:  
         type: "string"
         format: "string"
-        default: "Task with ID 1 Already Exists"
+        default: "OK"
       Body:
         $ref: "#/definitions/Task"
       Status:
@@ -239,7 +239,7 @@ definitions:
       Message:  
         type: "string"
         format: "string"
-        default: "Updated Successfully"
+        default: "OK"
       Body:
         $ref: "#/definitions/taskRequestUpdateBody"
       Status:
@@ -253,7 +253,7 @@ definitions:
       Message:  
         type: "string"
         format: "string"
-        default: "Created Successfully"
+        default: "OK"
       Body:
         $ref: "#/definitions/Task"
       Status:

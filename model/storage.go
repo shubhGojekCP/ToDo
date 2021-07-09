@@ -44,7 +44,7 @@ func (s Storage) GetById(id int) (ToDoList, error) {
 	if checkExistence(id) {
 		return Data[id], nil
 	}
-	return ToDoList{}, errors.New(fmt.Sprintf("Data with ID %d not Found", id))
+	return ToDoList{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", id))
 }
 
 func (s Storage) RemoveById(id int) (ToDoList, error) {
