@@ -54,13 +54,13 @@ func (s Storage) RemoveById(id int) (ToDoList, error) {
 		delete(Data, id)
 		return instance, nil
 	}
-	return ToDoList{}, errors.New("Not Found")
+	return ToDoList{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", id))
 }
 
 func (s Storage) UpdateTask(newTask ToDoList) (ToDoList, error) {
 	utils.InfoLogger.Println(">> UpdateTask")
 	if !checkExistence(newTask.Id) {
-		return ToDoList{}, errors.New("Not Found")
+		return ToDoList{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", newTask.Id))
 	}
 	Data[newTask.Id] = newTask
 	return Data[newTask.Id], nil

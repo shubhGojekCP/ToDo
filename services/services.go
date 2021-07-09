@@ -28,7 +28,7 @@ func (s Service) SvcGetAllData() ([]controller.ToDo, error) {
 	utils.InfoLogger.Println(">> GetAllData")
 	values, err := s.DataStore.AllTask()
 	if err != nil {
-		return []controller.ToDo{}, nil
+		return []controller.ToDo{}, err
 	}
 	var res []controller.ToDo
 	for _, data := range values {
