@@ -168,7 +168,7 @@ paths:
           schema:
             $ref: "#/definitions/Response400"
         "404":
-          description: "Task with ID not Found"
+          description: "Task with ID Not Found"
           schema:
             $ref: "#/definitions/Response404"
  
@@ -199,10 +199,7 @@ definitions:
         default: "OK"
       Body:
         $ref: "#/definitions/Task"
-      Status:
-        type: "integer"
-        format: "int64"
-        default: "200"
+     
     xml: {}
   Delete200:
     type: "object"
@@ -213,10 +210,6 @@ definitions:
         default: "Deleted"
       Body:
         $ref: "#/definitions/Task"
-      Status:
-        type: "integer"
-        format: "int64"
-        default: "200"
     xml: {}
   ResponseById200:
     type: "object"
@@ -227,10 +220,6 @@ definitions:
         default: "OK"
       Body:
         $ref: "#/definitions/Task"
-      Status:
-        type: "integer"
-        format: "int64"
-        default: "200"
     xml: {}
   
   ResponseUpdate200:
@@ -242,10 +231,6 @@ definitions:
         default: "OK"
       Body:
         $ref: "#/definitions/taskRequestUpdateBody"
-      Status:
-        type: "integer"
-        format: "int64"
-        default: "200"
     xml: {}
   Response201:
     type: "object"
@@ -256,10 +241,6 @@ definitions:
         default: "OK"
       Body:
         $ref: "#/definitions/Task"
-      Status:
-        type: "integer"
-        format: "int64"
-        default: 201
     xml: {}
   Response400:
     type: "object"
@@ -286,7 +267,7 @@ definitions:
         format: "int64"
         default: 404
     example:
-      Message: "Data With ID 2 not Found"
+      Message: "Data With ID 2 Not Found"
       ErrorCode: 404
     xml: {}
 
@@ -301,10 +282,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Task"
-      Status:
-        type: "integer"
-        format: "int64"
-        default: 200
     xml:
       name: "todosList"
   taskRequestBody:
