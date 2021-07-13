@@ -11,17 +11,20 @@ type Service struct {
 }
 
 type Store interface {
-	AddTask(data model.ToDoList) model.ToDoList
+	AddTask(data model.ToDoList) (model.ToDoList, error)
 	GetById(id int) (model.ToDoList, error)
 	RemoveById(id int) (model.ToDoList, error)
 	UpdateTask(data model.ToDoList) (model.ToDoList, error)
 	AllTask() ([]model.ToDoList, error)
 }
 
-func (s Service) SvcAddTask(data controller.ToDo) controller.ToDo {
+func (s Service) SvcAddTask(data controller.ToDo) (controller.ToDo, error) {
 	utils.InfoLogger.Println(">> AddTask")
-	res := s.DataStore.AddTask(model.ToDoList{Id: data.Id, Status: data.Status, Task: data.Task})
-	return controller.ToDo{Id: res.Id, Status: res.Status, Task: res.Task}
+	res, err := s.DataStore.AddTask(model.ToDoList{Id: data.Id, Status: data.Status, Task: data.Task})
+	if err != nil {
+		return controller.ToDo{}, err
+	}
+	return controller.ToDo{Id: res.Id, Status: res.Status, Task: res.Task}, nil
 }
 
 func (s Service) SvcGetAllData() ([]controller.ToDo, error) {

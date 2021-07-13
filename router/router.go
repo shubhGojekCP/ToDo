@@ -4,13 +4,16 @@ import (
 	"ToDo/controller"
 	"ToDo/model"
 	"ToDo/services"
+	"context"
 
 	"github.com/gorilla/mux"
 )
 
 func Router() *mux.Router {
+	ctx, _ := context.WithCancel(context.Background())
+	Storage := model.Connect(ctx)
 	controller := controller.Handler{
-		Service: services.Service{DataStore: model.Storage{}},
+		Service: services.Service{DataStore: Storage},
 	}
 
 	router := mux.NewRouter()

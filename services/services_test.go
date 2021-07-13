@@ -11,14 +11,14 @@ import (
 )
 
 type mockStorage struct {
-	mockAddTask    func(data model.ToDoList) model.ToDoList
+	mockAddTask    func(data model.ToDoList) (model.ToDoList, error)
 	mockGetById    func(id int) (model.ToDoList, error)
 	mockRemoveById func(id int) (model.ToDoList, error)
 	mockUpdateTask func(data model.ToDoList) (model.ToDoList, error)
 	mockAllTask    func() ([]model.ToDoList, error)
 }
 
-func (m mockStorage) AddTask(data model.ToDoList) model.ToDoList {
+func (m mockStorage) AddTask(data model.ToDoList) (model.ToDoList, error) {
 	return m.mockAddTask(data)
 }
 
@@ -39,8 +39,8 @@ func (m mockStorage) AllTask() ([]model.ToDoList, error) {
 }
 
 func TestSvcAddTask(t *testing.T) {
-	s := Service{DataStore: mockStorage{mockAddTask: func(data model.ToDoList) model.ToDoList { return data }}}
-	res := s.SvcAddTask(controller.ToDo{Id: 1, Status: true, Task: "Running"})
+	s := Service{DataStore: mockStorage{mockAddTask: func(data model.ToDoList) (model.ToDoList, error) { return data, nil }}}
+	res, _ := s.SvcAddTask(controller.ToDo{Id: 1, Status: true, Task: "Running"})
 	assert.Equal(t, controller.ToDo{Id: 1, Status: true, Task: "Running"}, res)
 
 }

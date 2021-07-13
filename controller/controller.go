@@ -33,7 +33,7 @@ type Handler struct {
 }
 
 type ToDoService interface {
-	SvcAddTask(req ToDo) ToDo
+	SvcAddTask(req ToDo) (ToDo, error)
 	SvcGetDataById(id int) (ToDo, error)
 	SvcRemoveTask(id int) (ToDo, error)
 	SvcUpdateTask(req ToDo) (ToDo, error)
@@ -50,7 +50,7 @@ func checkDataValidation(body io.Reader) (ToDo, error) {
 		return ToDo{}, err
 	}
 	if err := json.Unmarshal(bodyBytes, &data); err != nil {
-		utils.ErrorLogger.Println(">> Invalid Data")
+		utils.ErrorLogger.Println(err.Error())
 		return ToDo{}, errors.New("Invalid Data,Bad Request")
 	}
 	return data, nil
@@ -61,7 +61,7 @@ func checkParamValidation(params map[string]string) error {
 	utils.InfoLogger.Println(">> checkParamValidation")
 	_, err := strconv.Atoi(params["id"])
 	if err != nil {
-		utils.ErrorLogger.Println(">> Invalid ID")
+		utils.ErrorLogger.Println(err.Error())
 		return errors.New("Invalid ID")
 	}
 	return nil
@@ -83,7 +83,12 @@ func (h Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response{Message: "OK", Data: res})
 		return
 	}
-	res = h.Service.SvcAddTask(data)
+	res, err = h.Service.SvcAddTask(data)
+	if err != nil {
+		w.WriteHeader(500)
+		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+		return
+	}
 	w.WriteHeader(201)
 	json.NewEncoder(w).Encode(response{Message: "OK", Data: res})
 
@@ -103,6 +108,11 @@ func (h Handler) GetTaskById(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(params["id"])
 	res, err := h.Service.SvcGetDataById(id)
 	if err != nil {
+		if err.Error() == "Internal Server Error" {
+			w.WriteHeader(500)
+			json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+			return
+		}
 		w.WriteHeader(404)
 		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 404})
 		return
@@ -148,6 +158,11 @@ func (h Handler) UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err = h.Service.SvcGetDataById(data.Id)
 	if err != nil {
+		if err.Error() == "Internal Server Error" {
+			w.WriteHeader(500)
+			json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+			return
+		}
 		w.WriteHeader(404)
 		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 404})
 		return
@@ -172,6 +187,8 @@ func (h Handler) GetAllTask(w http.ResponseWriter, r *http.Request) {
 	res, err := h.Service.SvcGetAllData()
 	if err != nil {
 		w.WriteHeader(500)
+		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+		return
 	}
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(response{Message: "OK", Data: res})

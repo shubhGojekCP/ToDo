@@ -13,14 +13,14 @@ import (
 )
 
 type mockedService struct {
-	mockSvcAddTask     func(req ToDo) ToDo
+	mockSvcAddTask     func(req ToDo) (ToDo, error)
 	mockSvcGetDataById func(id int) (ToDo, error)
 	mockSvcRemoveTask  func(id int) (ToDo, error)
 	mockSvcUpdateTask  func(req ToDo) (ToDo, error)
 	mockSvcGetAllData  func() ([]ToDo, error)
 }
 
-func (m mockedService) SvcAddTask(req ToDo) ToDo {
+func (m mockedService) SvcAddTask(req ToDo) (ToDo, error) {
 	return m.mockSvcAddTask(req)
 }
 
@@ -47,12 +47,12 @@ func TestCreateTask(t *testing.T) {
 		handler  Handler
 	}{ // Creating Task For the First Time
 		{`{"Id":1,"Task":"Running","Status":true}`, http.StatusCreated, `{"Message":"OK","Body":{"Id":1,"Task":"Running","Status":true}}` + "\n",
-			Handler{Service: mockedService{mockSvcAddTask: func(req ToDo) ToDo { return req },
+			Handler{Service: mockedService{mockSvcAddTask: func(req ToDo) (ToDo, error) { return req, nil },
 				mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{}, errors.New(fmt.Sprintf("Task with ID %d not Found", id)) }}}},
 
 		// Creating Task With Same ID
 		{`{"Id":1,"Task":"Running","Status":true}`, http.StatusOK, `{"Message":"OK","Body":{"Id":1,"Task":"Running","Status":true}}` + "\n",
-			Handler{Service: mockedService{mockSvcAddTask: func(req ToDo) ToDo { return req },
+			Handler{Service: mockedService{mockSvcAddTask: func(req ToDo) (ToDo, error) { return req, nil },
 				mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{Id: 1, Task: "Running", Status: true}, nil }}}},
 
 		// Creating Task With Invalid Data
