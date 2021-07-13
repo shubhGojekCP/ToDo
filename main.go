@@ -13,11 +13,16 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
+func init() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
+
+}
+
+func main() {
+
 	port := os.Getenv("PORT")
 	r := router.Router()
 	srv := &http.Server{
