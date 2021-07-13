@@ -46,6 +46,10 @@ paths:
           description: "successfully obtained data"
           schema:
             $ref: "#/definitions/todosList"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Response500"
     post:
       operationId: "createTask"
       deprecated: false
@@ -77,6 +81,10 @@ paths:
           description: "Task With Same ID Already Exists"
           schema:
             $ref: "#/definitions/Response200"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Response500"
     put:
       operationId: "updateTask"
       deprecated: false
@@ -108,6 +116,10 @@ paths:
           description: "Invalid Data,Bad Request"
           schema:
             $ref: "#/definitions/Response400"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Response500"
   /task/{Id}:
     get:
       operationId: "getTaskById"
@@ -140,6 +152,10 @@ paths:
           description: "Task with ID not Found"
           schema:
             $ref: "#/definitions/Response404"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Response500"
     delete:
       operationId: "getDeletekById"
       deprecated: false
@@ -171,6 +187,10 @@ paths:
           description: "Task with ID Not Found"
           schema:
             $ref: "#/definitions/Response404"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Response500"
  
 definitions:
   Task:
@@ -256,6 +276,20 @@ definitions:
       Message: "Invalid Data, Bad Request"
       ErrorCode: 400
     xml: {}
+  Response500:
+    type: "object"
+    properties:
+      Message:  
+        type: "string"
+        format: "string"
+      ErrorCode:
+        type: "integer"
+        format: "int64"
+    example:
+      Message: "Internal Server Error"
+      ErrorCode: 500
+    xml: {}
+    
   Response404:
     type: "object"
     properties:

@@ -701,6 +701,7 @@ margin-bottom: 20px;
         defs["Response201"] = {"type":"object","properties":{"Message":{"type":"string","format":"string","default":"OK"},"Body":{"$ref":"#/definitions/Task"}},"xml":{}};
         defs["Response400"] = {"type":"object","properties":{"Message":{"type":"string","format":"string"},"ErrorCode":{"type":"integer","format":"int64","default":400}},"xml":{},"example":{"Message":"Invalid Data, Bad Request","ErrorCode":400}};
         defs["Response404"] = {"type":"object","properties":{"Message":{"type":"string","format":"string"},"ErrorCode":{"type":"integer","format":"int64","default":404}},"xml":{},"example":{"Message":"Data With ID 2 Not Found","ErrorCode":404}};
+        defs["Response500"] = {"type":"object","properties":{"Message":{"type":"string","format":"string"},"ErrorCode":{"type":"integer","format":"int64"}},"xml":{},"example":{"Message":"Internal Server Error","ErrorCode":500}};
         defs["ResponseById200"] = {"type":"object","properties":{"Message":{"type":"string","format":"string","default":"OK"},"Body":{"$ref":"#/definitions/Task"}},"xml":{}};
         defs["ResponseUpdate200"] = {"type":"object","properties":{"Message":{"type":"string","format":"string","default":"OK"},"Body":{"$ref":"#/definitions/taskRequestUpdateBody"}},"xml":{}};
         defs["Task"] = {"type":"object","properties":{"Id":{"type":"integer","format":"int64"},"Task":{"type":"string","format":"string"},"Status":{"type":"boolean","format":"boolean"}},"xml":{},"example":{"Id":1,"Task":"Running","Status":false}};
@@ -1147,6 +1148,49 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
+                            <h3> Status: 500 - Internal Server Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-createTask-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-createTask-500-schema">
+                                  <div id='responses-createTask-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Internal Server Error",
+  "schema" : {
+    "$ref" : "#/definitions/Response500"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = defs;
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-createTask-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-createTask-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-createTask-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
                         </article>
                       </div>
                       <hr>
@@ -1525,6 +1569,49 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-getDeletekById-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Internal Server Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-getDeletekById-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-getDeletekById-500-schema">
+                                  <div id='responses-getDeletekById-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Internal Server Error",
+  "schema" : {
+    "$ref" : "#/definitions/Response500"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = defs;
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-getDeletekById-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-getDeletekById-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-getDeletekById-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -1909,6 +1996,49 @@ except ApiException as e:
                                 </div>
                             </div>
 
+                            <h3> Status: 500 - Internal Server Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-getTaskById-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-getTaskById-500-schema">
+                                  <div id='responses-getTaskById-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Internal Server Error",
+  "schema" : {
+    "$ref" : "#/definitions/Response500"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = defs;
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-getTaskById-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-getTaskById-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-getTaskById-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
                         </article>
                       </div>
                       <hr>
@@ -2158,6 +2288,49 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-getTodos-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Internal Server Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-getTodos-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-getTodos-500-schema">
+                                  <div id='responses-getTodos-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Internal Server Error",
+  "schema" : {
+    "$ref" : "#/definitions/Response500"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = defs;
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-getTodos-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-getTodos-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-getTodos-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -2548,6 +2721,49 @@ $(document).ready(function() {
                                     </script>
                                   </div>
                                   <input id='responses-updateTask-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Internal Server Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-updateTask-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-updateTask-500-schema">
+                                  <div id='responses-updateTask-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Internal Server Error",
+  "schema" : {
+    "$ref" : "#/definitions/Response500"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = defs;
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-updateTask-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-updateTask-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-updateTask-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
