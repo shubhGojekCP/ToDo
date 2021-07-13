@@ -5,6 +5,7 @@ import (
 	"ToDo/model"
 	"ToDo/services"
 	"context"
+	"net/http"
 
 	"github.com/gorilla/mux"
 )
@@ -23,6 +24,7 @@ func Router() (*mux.Router, context.CancelFunc) {
 	router.HandleFunc("/api/task/{id}", controller.DeleteTask).Methods("DELETE")
 	router.HandleFunc("/api/task", controller.UpdateTaskStatus).Methods("PUT")
 	router.HandleFunc("/api/task", controller.GetAllTask).Methods("GET")
+	router.Handle("/", http.FileServer(http.Dir("./static")))
 
 	return router, cancel
 }
