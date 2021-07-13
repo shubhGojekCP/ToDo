@@ -19,8 +19,8 @@ type ToDo struct {
 }
 
 type response struct {
-	Message string `json:"Message"`
-	Data    ToDo   `json:"Body"`
+	Message string      `json:"Message"`
+	Data    interface{} `json:"Body"`
 }
 
 type errorResponse struct {
@@ -40,8 +40,8 @@ type ToDoService interface {
 	SvcGetAllData() ([]ToDo, error)
 }
 
-func checkDataValidation(body io.Reader) (ToDo, error) {
-	utils.InfoLogger.Println(">> checkDataValidation")
+func requestBodyValidation(body io.Reader) (ToDo, error) {
+	utils.InfoLogger.Println(">> requestBodyValidation")
 	var data ToDo
 	bodyBytes, err := ioutil.ReadAll(body)
 
@@ -71,10 +71,9 @@ func checkParamValidation(params map[string]string) error {
 // invalid Data,or 200 if Task with ID already exists.
 func (h Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	utils.InfoLogger.Println(">> CreateTask")
-	data, err := checkDataValidation(r.Body)
+	data, err := requestBodyValidation(r.Body)
 	if err != nil {
-		w.WriteHeader(400)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 400})
+		errorResponseHandler(err, w)
 		return
 	}
 	res, err := h.Service.SvcGetDataById(data.Id)
@@ -82,15 +81,16 @@ func (h Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		json.NewEncoder(w).Encode(response{Message: "OK", Data: res})
 		return
+	} else if err.Error() == "Internal Server Error" {
+		errorResponseHandler(err, w)
+		return
 	}
 	res, err = h.Service.SvcAddTask(data)
 	if err != nil {
-		w.WriteHeader(500)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+		errorResponseHandler(err, w)
 		return
 	}
-	w.WriteHeader(201)
-	json.NewEncoder(w).Encode(response{Message: "OK", Data: res})
+	successResponseHandler(201, res, w)
 
 }
 
@@ -101,24 +101,16 @@ func (h Handler) GetTaskById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	err := checkParamValidation(params)
 	if err != nil {
-		w.WriteHeader(400)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 400})
+		errorResponseHandler(err, w)
 		return
 	}
 	id, _ := strconv.Atoi(params["id"])
 	res, err := h.Service.SvcGetDataById(id)
 	if err != nil {
-		if err.Error() == "Internal Server Error" {
-			w.WriteHeader(500)
-			json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
-			return
-		}
-		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 404})
+		errorResponseHandler(err, w)
 		return
 	}
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(response{Message: "OK", Data: res})
+	successResponseHandler(200, res, w)
 
 }
 
@@ -129,68 +121,77 @@ func (h Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	err := checkParamValidation(params)
 	if err != nil {
-		w.WriteHeader(400)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 400})
+		errorResponseHandler(err, w)
 		return
 	}
 	id, _ := strconv.Atoi(params["id"])
 	res, err := h.Service.SvcGetDataById(id)
 	if err != nil {
-		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 404})
+		errorResponseHandler(err, w)
 		return
 	}
 	res, err = h.Service.SvcRemoveTask(id)
 
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(response{Message: "OK", Data: res})
+	successResponseHandler(200, res, w)
 }
 
 // UpdateTaskStatus updates a task based on valid data provided,else return 400 for
 // invalid data,or 404 if Task with ID does not exists.
 func (h Handler) UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
 	utils.InfoLogger.Println(">> UpdatetaskStatus")
-	data, err := checkDataValidation(r.Body)
+	data, err := requestBodyValidation(r.Body)
 	if err != nil {
-		w.WriteHeader(400)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 400})
+		errorResponseHandler(err, w)
 		return
 	}
 	_, err = h.Service.SvcGetDataById(data.Id)
 	if err != nil {
 		if err.Error() == "Internal Server Error" {
-			w.WriteHeader(500)
-			json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+			errorResponseHandler(err, w)
 			return
 		}
-		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 404})
+		errorResponseHandler(err, w)
 		return
 	}
 	res, err := h.Service.SvcUpdateTask(data)
 	if err != nil {
-		w.WriteHeader(500)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+		errorResponseHandler(err, w)
 		return
 	}
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(response{Message: "OK", Data: res})
+	successResponseHandler(200, res, w)
 }
 
 //GetAllTask gets all the tasks.
 func (h Handler) GetAllTask(w http.ResponseWriter, r *http.Request) {
 	utils.InfoLogger.Println(">> GetAllTask")
-	type response struct {
-		Message string `json:"Message"`
-		Data    []ToDo `json:"Data"`
-	}
 	res, err := h.Service.SvcGetAllData()
 	if err != nil {
-		w.WriteHeader(500)
-		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+		errorResponseHandler(err, w)
 		return
 	}
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(response{Message: "OK", Data: res})
+	successResponseHandler(200, res, w)
 
+}
+
+func errorResponseHandler(err error, w http.ResponseWriter) {
+	switch err.Error() {
+	case "Internal Server Error":
+		w.WriteHeader(500)
+		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 500})
+	case "Invalid ID":
+		w.WriteHeader(400)
+		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 400})
+	case "Invalid Data,Bad Request":
+		w.WriteHeader(400)
+		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 400})
+	default:
+		w.WriteHeader(404)
+		json.NewEncoder(w).Encode(errorResponse{Message: err.Error(), ErrorCode: 404})
+	}
+
+}
+
+func successResponseHandler(status int, body interface{}, w http.ResponseWriter) {
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(response{Message: "OK", Data: body})
 }

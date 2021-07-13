@@ -39,16 +39,50 @@ func (m mockStorage) AllTask() ([]model.ToDoList, error) {
 }
 
 func TestSvcAddTask(t *testing.T) {
-	s := Service{DataStore: mockStorage{mockAddTask: func(data model.ToDoList) (model.ToDoList, error) { return data, nil }}}
-	res, _ := s.SvcAddTask(controller.ToDo{Id: 1, Status: true, Task: "Running"})
-	assert.Equal(t, controller.ToDo{Id: 1, Status: true, Task: "Running"}, res)
+	var mockedData = []struct {
+		data    controller.ToDo
+		err     error
+		service Service
+		res     controller.ToDo
+	}{
+		{controller.ToDo{Id: 1, Status: true, Task: "Running"}, nil,
+			Service{DataStore: mockStorage{mockAddTask: func(data model.ToDoList) (model.ToDoList, error) { return data, nil }}},
+			controller.ToDo{Id: 1, Status: true, Task: "Running"}},
+		{controller.ToDo{Id: 1, Status: true, Task: "Running"}, errors.New("Internal Server Error"),
+			Service{DataStore: mockStorage{mockAddTask: func(data model.ToDoList) (model.ToDoList, error) {
+				return model.ToDoList{}, errors.New("Internal Server Error")
+			}}},
+			controller.ToDo{}},
+	}
+	for _, rr := range mockedData {
+		s := rr.service
+		res, err := s.SvcAddTask(rr.data)
+		assert.Equal(t, rr.res, res)
+		assert.Equal(t, rr.err, err)
+
+	}
 
 }
 
 func TestSvcGetAllData(t *testing.T) {
-	s := Service{DataStore: mockStorage{mockAllTask: func() ([]model.ToDoList, error) { return []model.ToDoList{{Id: 1, Task: "Running", Status: true}}, nil }}}
-	res, _ := s.SvcGetAllData()
-	assert.Equal(t, []controller.ToDo{{Id: 1, Status: true, Task: "Running"}}, res)
+	var mockedData = []struct {
+		err     error
+		service Service
+		res     []controller.ToDo
+	}{
+		{nil, Service{DataStore: mockStorage{mockAllTask: func() ([]model.ToDoList, error) { return []model.ToDoList{{1, "Running", true}}, nil }}},
+			[]controller.ToDo{{Id: 1, Status: true, Task: "Running"}}},
+		{errors.New("Internal Server Error"),
+			Service{DataStore: mockStorage{mockAllTask: func() ([]model.ToDoList, error) { return []model.ToDoList{}, errors.New("Internal Server Error") }}},
+			[]controller.ToDo{}},
+	}
+	for _, rr := range mockedData {
+		s := rr.service
+		res, err := s.SvcGetAllData()
+		assert.Equal(t, rr.res, res)
+		assert.Equal(t, rr.err, err)
+
+	}
 
 }
 
@@ -65,6 +99,9 @@ func TestSvcGetDataById(t *testing.T) {
 		{2, Service{DataStore: mockStorage{mockGetById: func(id int) (model.ToDoList, error) {
 			return model.ToDoList{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", id))
 		}}}, errors.New(fmt.Sprintf("Task with ID %d Not Found", 2)), controller.ToDo{}},
+		{2, Service{DataStore: mockStorage{mockGetById: func(id int) (model.ToDoList, error) {
+			return model.ToDoList{}, errors.New("Internal Server Error")
+		}}}, errors.New("Internal Server Error"), controller.ToDo{}},
 	}
 	for _, rr := range mockedData {
 		res, err := rr.service.SvcGetDataById(rr.id)
@@ -87,6 +124,9 @@ func TestSvcRemoveTask(t *testing.T) {
 		{2, Service{DataStore: mockStorage{mockRemoveById: func(id int) (model.ToDoList, error) {
 			return model.ToDoList{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", id))
 		}}}, errors.New(fmt.Sprintf("Task with ID %d Not Found", 2)), controller.ToDo{}},
+		{2, Service{DataStore: mockStorage{mockRemoveById: func(id int) (model.ToDoList, error) {
+			return model.ToDoList{}, errors.New("Internal Server Error")
+		}}}, errors.New("Internal Server Error"), controller.ToDo{}},
 	}
 	for _, rr := range mockedData {
 		res, err := rr.service.SvcRemoveTask(rr.id)
@@ -108,6 +148,9 @@ func TestSvcUpdateTask(t *testing.T) {
 		{controller.ToDo{Id: 2, Task: "Jogging", Status: false}, Service{DataStore: mockStorage{mockUpdateTask: func(data model.ToDoList) (model.ToDoList, error) {
 			return model.ToDoList{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", data.Id))
 		}}}, errors.New(fmt.Sprintf("Task with ID %d Not Found", 2)), controller.ToDo{}},
+		{controller.ToDo{Id: 2, Task: "Jogging", Status: false}, Service{DataStore: mockStorage{mockUpdateTask: func(data model.ToDoList) (model.ToDoList, error) {
+			return model.ToDoList{}, errors.New("Internal Server Error")
+		}}}, errors.New("Internal Server Error"), controller.ToDo{}},
 	}
 	for _, rr := range mockedData {
 		res, err := rr.service.SvcUpdateTask(rr.data)

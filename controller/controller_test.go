@@ -58,6 +58,10 @@ func TestCreateTask(t *testing.T) {
 		// Creating Task With Invalid Data
 		{`{"Id":1,"Task":"Running","Status":"true"}`, http.StatusBadRequest, `{"Message":"Invalid Data,Bad Request","ErrorCode":400}` + "\n",
 			Handler{}},
+
+		// Internal Server Error
+		{`{"Id":3,"Task":"Running","Status":true}`, http.StatusInternalServerError, `{"Message":"Internal Server Error","ErrorCode":500}` + "\n",
+			Handler{Service: mockedService{mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{}, errors.New("Internal Server Error") }}}},
 	}
 
 	for _, e := range mockedData {
@@ -98,6 +102,10 @@ func TestGetTaskById(t *testing.T) {
 		// Getting Task For The Non Existent ID
 		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusNotFound, `{"Message":"Task with ID 3 Not Found","ErrorCode":404}` + "\n",
 			Handler{Service: mockedService{mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", id)) }}}},
+
+		// Internal Server Error
+		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusInternalServerError, `{"Message":"Internal Server Error","ErrorCode":500}` + "\n",
+			Handler{Service: mockedService{mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{}, errors.New("Internal Server Error") }}}},
 	}
 
 	for _, e := range mockedData {
@@ -139,6 +147,10 @@ func TestDeleteTask(t *testing.T) {
 		// Deleting Task For The Non Existent ID
 		{`{"Id":3,"Task":"Running","Status":true}`, `/api/task/4`, http.StatusNotFound, `{"Message":"Task with ID 4 Not Found","ErrorCode":404}` + "\n",
 			Handler{Service: mockedService{mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", id)) }}}},
+
+		// Internal Server Error
+		{`{"Id":2,"Task":"Running","Status":true}`, `/api/task/3`, http.StatusInternalServerError, `{"Message":"Internal Server Error","ErrorCode":500}` + "\n",
+			Handler{Service: mockedService{mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{}, errors.New("Internal Server Error") }}}},
 	}
 
 	for _, e := range mockedData {
@@ -178,6 +190,10 @@ func TestUpdateTask(t *testing.T) {
 		// Updating Task For The Non Existent ID
 		{`{"Id":4,"Task":"Running","Status":true}`, `{"Id":5,"Task":"Swimming","Status":false}`, http.StatusNotFound, `{"Message":"Task with ID 4 Not Found","ErrorCode":404}` + "\n",
 			Handler{Service: mockedService{mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", id)) }}}},
+
+		// Internal Server Error
+		{`{"Id":2,"Task":"Running","Status":true}`, `{"Id":5,"Task":"Swimming","Status":false}`, http.StatusInternalServerError, `{"Message":"Internal Server Error","ErrorCode":500}` + "\n",
+			Handler{Service: mockedService{mockSvcGetDataById: func(id int) (ToDo, error) { return ToDo{}, errors.New("Internal Server Error") }}}},
 	}
 	for _, e := range mockedData {
 		var mockedTask = []byte(e.updatedData)
@@ -208,6 +224,6 @@ func TestGetAllTask(t *testing.T) {
 	handler.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.Equal(t, `{"Message":"OK","Data":[{"Id":1,"Task":"Running","Status":true}]}`+"\n", rr.Body.String())
+	assert.Equal(t, `{"Message":"OK","Body":[{"Id":1,"Task":"Running","Status":true}]}`+"\n", rr.Body.String())
 
 }
