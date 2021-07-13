@@ -24,7 +24,8 @@ func init() {
 func main() {
 
 	port := os.Getenv("PORT")
-	r := router.Router()
+	r, cancelFunc := router.Router()
+	defer cancelFunc()
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: r,

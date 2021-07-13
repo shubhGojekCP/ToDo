@@ -115,7 +115,7 @@ func (s Storage) RemoveById(id int) (ToDoList, error) {
 	err := collection.FindOneAndDelete(ctx, bson.M{"id": id}).Decode(&res)
 	if err != nil {
 		utils.ErrorLogger.Println(err.Error())
-		return ToDoList{}, errors.New(fmt.Sprintf("Task with ID %d Not Found", id))
+		return ToDoList{}, errors.New("Internal Server Error")
 
 	}
 	return res, nil
@@ -131,7 +131,7 @@ func (s Storage) UpdateTask(newTask ToDoList) (ToDoList, error) {
 	err := collection.FindOneAndUpdate(ctx, bson.M{"id": newTask.Id}, bson.D{{"$set", bson.D{{"task", newTask.Task}, {"status", newTask.Status}}}}).Decode(&res)
 	if err != nil {
 		utils.ErrorLogger.Println(err.Error())
-		return ToDoList{}, err
+		return ToDoList{}, errors.New("Internal Server Error")
 
 	}
 	return newTask, nil

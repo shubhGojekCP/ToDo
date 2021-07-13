@@ -70,7 +70,7 @@ func TestSvcGetAllData(t *testing.T) {
 		service Service
 		res     []controller.ToDo
 	}{
-		{nil, Service{DataStore: mockStorage{mockAllTask: func() ([]model.ToDoList, error) { return []model.ToDoList{{1, "Running", true}}, nil }}},
+		{nil, Service{DataStore: mockStorage{mockAllTask: func() ([]model.ToDoList, error) { return []model.ToDoList{{Id: 1, Task: "Running", Status: true}}, nil }}},
 			[]controller.ToDo{{Id: 1, Status: true, Task: "Running"}}},
 		{errors.New("Internal Server Error"),
 			Service{DataStore: mockStorage{mockAllTask: func() ([]model.ToDoList, error) { return []model.ToDoList{}, errors.New("Internal Server Error") }}},

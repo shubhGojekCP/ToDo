@@ -9,8 +9,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Router() *mux.Router {
-	ctx, _ := context.WithCancel(context.Background())
+func Router() (*mux.Router, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(context.Background())
 	Storage := model.Connect(ctx)
 	controller := controller.Handler{
 		Service: services.Service{DataStore: Storage},
@@ -24,5 +24,5 @@ func Router() *mux.Router {
 	router.HandleFunc("/api/task", controller.UpdateTaskStatus).Methods("PUT")
 	router.HandleFunc("/api/task", controller.GetAllTask).Methods("GET")
 
-	return router
+	return router, cancel
 }
